@@ -1,0 +1,751 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Relance en losange</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* Layout : carnet de terrain en une colonne. Chaque exercice = terrain animé (mise en place puis exercice) + fiche coach dessous ; 2 colonnes au-delà de 980px. */
+:root{
+  --bg:#eef2ed; --surface:#ffffff; --ink:#10241a; --muted:#566a5d; --line:#d5dfd7;
+  --brand:#0d3d20; --brand-2:#1a6b3a; --on-brand:#ffffff; --gold:#e8b84b; --gold-soft:#fbf1d6; --gold-ink:#6b4e0c;
+  --ok:#1f7a45; --ok-soft:#e3f2e8; --warn:#a8481a; --warn-soft:#fbe9df; --chip:#e4ebe5;
+  --f-display:"Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  --f-label:"Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body:"Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0a1510; --surface:#12221a; --ink:#e6eee8; --muted:#9bb0a2; --line:#24392c;
+  --brand:#0d3d20; --brand-2:#4fb578; --on-brand:#ffffff; --gold:#e8b84b; --gold-soft:#2a2410; --gold-ink:#f0d58e;
+  --ok:#5cc489; --ok-soft:#14301f; --warn:#f08a5d; --warn-soft:#33190e; --chip:#1b2e23; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0a1510; --surface:#12221a; --ink:#e6eee8; --muted:#9bb0a2; --line:#24392c;
+  --brand:#0d3d20; --brand-2:#4fb578; --on-brand:#ffffff; --gold:#e8b84b; --gold-soft:#2a2410; --gold-ink:#f0d58e;
+  --ok:#5cc489; --ok-soft:#14301f; --warn:#f08a5d; --warn-soft:#33190e; --chip:#1b2e23; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:15.5px; line-height:1.5; -webkit-text-size-adjust:100%}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--brand)}
+.wrap{max-width:1180px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{text-wrap:balance}
+button{font:inherit; color:inherit}
+:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+
+/* En-tête */
+.hero{background:var(--brand); color:var(--on-brand)}
+.hero .wrap{padding-block:22px 24px; display:grid; gap:14px}
+.eyebrow{font-family:var(--f-label); font-weight:700; font-size:13px; letter-spacing:1.8px; text-transform:uppercase; opacity:.78}
+.hero h1{margin:0; font-family:var(--f-display); font-weight:400; font-size:clamp(40px, 9vw, 64px); line-height:.9; letter-spacing:1px}
+.hero h1 span{color:var(--gold)}
+.hero .sub{font-family:var(--f-label); font-weight:600; font-size:17px; letter-spacing:.3px; opacity:.9}
+.motto{border-left:4px solid var(--gold); padding:6px 0 6px 12px; font-family:var(--f-label); font-weight:700; font-size:20px; line-height:1.15; max-width:640px}
+.motto small{display:block; font-weight:500; font-size:14px; opacity:.75; margin-top:4px; letter-spacing:.2px}
+
+/* Navigation collante */
+.nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--surface); border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex; gap:6px; overflow-x:auto; padding-block:8px; scrollbar-width:none}
+.nav .wrap::-webkit-scrollbar{display:none}
+.nav a{flex:none; text-decoration:none; color:var(--ink); background:var(--chip); border-radius:999px; padding:6px 12px; font-family:var(--f-label); font-weight:700; font-size:14px; letter-spacing:.3px; white-space:nowrap}
+.nav a b{font-family:var(--f-display); font-weight:400; font-size:16px; color:var(--brand-2); margin-right:4px; letter-spacing:.5px}
+.nav a.on{background:var(--brand); color:var(--on-brand)}
+.nav a.on b{color:var(--gold)}
+
+main{display:grid; gap:28px; padding-block:22px 40px}
+.lbl{font-family:var(--f-label); font-weight:700; font-size:12.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--muted)}
+
+/* Déroulé */
+.plan{display:grid; gap:12px}
+.timeline{display:flex; height:44px; border-radius:10px; overflow:hidden; border:1px solid var(--line)}
+.timeline a{display:flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; font-family:var(--f-display); font-size:18px; letter-spacing:.5px; min-width:0; border-right:2px solid var(--bg)}
+.timeline a:last-child{border-right:0}
+.tl-rows{display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:8px}
+.tl-row{display:flex; gap:10px; align-items:baseline; text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 12px}
+.tl-row .m{font-family:var(--f-display); font-size:24px; line-height:1; min-width:44px; font-variant-numeric:tabular-nums}
+.tl-row .t{font-family:var(--f-label); font-weight:700; font-size:16px; line-height:1.15}
+.tl-row .d{display:block; font-family:var(--f-body); font-weight:400; font-size:13px; color:var(--muted)}
+
+.before{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:10px}
+.note{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px}
+.note h3{margin:0 0 4px; font-family:var(--f-label); font-weight:700; font-size:15px; letter-spacing:1.2px; text-transform:uppercase; color:var(--brand-2)}
+.note p{margin:0; font-size:14.5px}
+.note.gold{background:var(--gold-soft); border-color:transparent}
+.note.gold h3{color:var(--gold-ink)}
+
+/* Exercice */
+.ex{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 60px); display:grid; gap:14px}
+.ex-head{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; align-items:end; border-top:3px solid var(--brand); padding-top:14px}
+.ex-num{grid-row:span 2; font-family:var(--f-display); font-size:76px; line-height:.78; color:var(--brand-2)}
+.ex-head h2{margin:0; font-family:var(--f-display); font-weight:400; font-size:clamp(32px, 7vw, 44px); line-height:.92; letter-spacing:.8px}
+.ex-head .dur{font-family:var(--f-label); font-weight:700; font-size:15px; color:var(--muted); letter-spacing:.4px}
+.ex-head .dur b{background:var(--gold); color:#0d3d20; border-radius:6px; padding:1px 7px; margin-right:6px; font-family:var(--f-display); font-weight:400; font-size:17px; letter-spacing:.5px}
+.obj{font-family:var(--f-label); font-weight:700; font-size:19px; line-height:1.2; margin:0; max-width:760px}
+.meta{display:flex; flex-wrap:wrap; gap:6px}
+.meta span{background:var(--chip); border-radius:999px; padding:4px 11px; font-size:13.5px}
+.meta span b{font-family:var(--f-label); font-weight:700; letter-spacing:.6px; text-transform:uppercase; font-size:12px; color:var(--muted); margin-right:5px}
+
+.ex-grid{display:grid; gap:16px}
+@media (min-width:980px){
+  .ex-grid{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr); align-items:start}
+  .player{position:sticky; top:calc(env(safe-area-inset-top,0px) + 64px)}
+}
+.player{background:var(--surface); border:1px solid var(--line); border-radius:18px; overflow:hidden; min-width:0}
+.pitchbox{background:#256b3b; position:relative}
+.pitchbox svg{display:block; width:100%; height:auto}
+.stage{padding:12px 14px 6px; min-height:128px}
+.stage .ph{display:flex; gap:8px; align-items:center; font-family:var(--f-label); font-weight:700; font-size:12.5px; letter-spacing:1.4px; text-transform:uppercase}
+.tag{border-radius:6px; padding:2px 8px}
+.tag.set{background:var(--gold-soft); color:var(--gold-ink)}
+.tag.ex{background:var(--ok-soft); color:var(--ok)}
+.stage .ph .cnt{color:var(--muted); font-variant-numeric:tabular-nums}
+.stage h4{margin:6px 0 2px; font-family:var(--f-label); font-weight:700; font-size:20px; line-height:1.15}
+.stage p{margin:0; font-size:15px; color:var(--ink); opacity:.88}
+.bar{display:flex; gap:3px; padding:4px 14px 0}
+.bar button{flex:1; height:22px; padding:0; border:0; background:none; cursor:pointer; display:flex; align-items:center}
+.bar button i{display:block; width:100%; height:6px; border-radius:3px; background:var(--line); overflow:hidden; position:relative}
+.bar button i::after{content:""; position:absolute; inset:0 auto 0 0; width:var(--p,0%); background:var(--c)}
+.bar button.set{--c:var(--gold)}
+.bar button.ex{--c:var(--brand-2)}
+.ctrls{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 14px 14px}
+.ctrls .grp{display:flex; gap:6px}
+.btn{display:inline-flex; align-items:center; gap:6px; border:1.5px solid var(--line); background:var(--surface); border-radius:999px; padding:7px 12px; font-family:var(--f-label); font-weight:700; font-size:14.5px; letter-spacing:.3px; cursor:pointer; line-height:1}
+.btn svg{width:16px; height:16px; flex:none}
+.btn.main{background:var(--brand); border-color:var(--brand); color:var(--on-brand); padding:8px 16px}
+.btn.icon{padding:7px 9px}
+.btn.phase.on{border-color:var(--brand-2); color:var(--brand-2)}
+.ctrls .sp{flex:1}
+.legend{display:flex; flex-wrap:wrap; gap:4px 14px; padding:0 14px 12px; font-family:var(--f-label); font-weight:600; font-size:12.5px; color:var(--muted); letter-spacing:.3px}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend svg{width:22px; height:12px}
+
+/* Fiche coach */
+.sheet{display:grid; gap:12px; min-width:0}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px}
+.card h3{margin:0 0 8px; font-family:var(--f-label); font-weight:700; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:var(--brand-2)}
+.card h3 small{display:block; font-weight:500; font-size:13px; letter-spacing:.2px; text-transform:none; color:var(--muted)}
+.say{background:var(--brand); color:var(--on-brand); border-color:transparent}
+.say h3{color:var(--gold)}
+.say p{margin:0; font-family:var(--f-label); font-weight:600; font-size:19px; line-height:1.25}
+.checks{list-style:none; margin:0; padding:0; display:grid; gap:8px}
+.checks li{display:grid; grid-template-columns:22px 1fr; gap:8px; font-size:15px; line-height:1.4}
+.checks li::before{content:""; width:18px; height:18px; margin-top:2px; border-radius:5px; border:2px solid var(--brand-2)}
+.goals{list-style:none; margin:0; padding:0; display:grid; gap:8px}
+.goals li{background:var(--ok-soft); border-radius:10px; padding:9px 12px; font-family:var(--f-label); font-weight:700; font-size:17px; line-height:1.2; color:var(--ink)}
+.goals li em{font-style:normal; color:var(--ok)}
+.fix{display:grid; gap:10px}
+.fix div{display:grid; gap:3px}
+.fix .bad{font-size:14.5px; color:var(--muted)}
+.fix .bad::before{content:"Tu vois : "; font-family:var(--f-label); font-weight:700; color:var(--warn); letter-spacing:.3px}
+.fix .good{font-family:var(--f-label); font-weight:700; font-size:17px; line-height:1.2}
+.fix .good::before{content:"Tu dis : "; color:var(--brand-2)}
+.adapt{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+@media (max-width:520px){ .adapt{grid-template-columns:1fr} }
+.adapt div{border-radius:10px; padding:9px 12px; font-size:14.5px; background:var(--chip)}
+.adapt b{display:block; font-family:var(--f-label); font-weight:700; font-size:13px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted)}
+
+/* Causerie */
+.talk{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:10px}
+.talk .card{display:grid; gap:4px}
+.talk .big{font-family:var(--f-display); font-size:30px; line-height:.95; letter-spacing:.6px; color:var(--brand-2)}
+.talk p{margin:0; font-size:15px}
+.ask{background:var(--gold-soft); border-color:transparent}
+.ask p{font-family:var(--f-label); font-weight:700; font-size:19px; line-height:1.2}
+footer{color:var(--muted); font-size:13px; padding-block:0 30px}
+
+/* Terrain SVG */
+.hl-ring{fill:none; stroke:#ffd666; stroke-width:4; transform-box:fill-box; transform-origin:center; animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.95; transform:scale(1)} 50%{opacity:.35; transform:scale(1.18)}}
+.fade{animation:fadein .45s ease both}
+@keyframes fadein{from{opacity:0} to{opacity:1}}
+@media (prefers-reduced-motion: reduce){ .hl-ring,.fade{animation:none} }
+</style>
+<style>
+.keep{background:var(--gold-soft); border-color:transparent}
+.keep h3{color:var(--gold-ink)}
+.keep p{margin:0; font-family:var(--f-display); font-size:28px; line-height:1; letter-spacing:.5px; color:var(--ink)}
+.vid{margin:0; font-size:15.5px; line-height:1.55}
+.fiche .say p{font-size:18px}
+.ex-grid.solo{grid-template-columns:1fr}
+.howto{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:10px}
+</style>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">FC Pierrelaye CDM · Fiches tactiques</div>
+    <h1>La relance <span>en losange</span></h1>
+    <div class="sub">D’après la vidéo « Système de jeu : 4.4.2 en losange », partie offensive · adapté à notre équipe</div>
+    <div class="motto">Une relance n’est pas l’affaire d’une personne.
+      <small>8 fiches : le principe de la vidéo, ce que ça donne chez nous, et la phrase à retenir.</small></div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Fiches"><div class="wrap" id="nav"></div></nav>
+
+<main class="wrap" id="main">
+  <section class="plan" aria-labelledby="idx-t">
+    <div class="lbl" id="idx-t">Les 8 fiches</div>
+    <div class="tl-rows" id="index"></div>
+  </section>
+  <section aria-labelledby="how-t" style="display:grid; gap:10px">
+    <div class="lbl" id="how-t">Comment lire une fiche</div>
+    <div class="howto">
+      <div class="note"><h3>Le schéma</h3><p>« Placement » montre où chacun se met. « Action » déroule le mouvement, passe par passe. Lance la vidéo ou avance avec les flèches.</p></div>
+      <div class="note"><h3>La vidéo</h3><p>Ce qu’explique le coach, résumé. Le minutage permet de retrouver le passage.</p></div>
+      <div class="note"><h3>Chez nous</h3><p>Le même principe avec nos postes et nos prénoms.</p></div>
+    </div>
+  </section>
+  <div id="fiches" style="display:grid; gap:40px"></div>
+</main>
+<footer class="wrap">FC Pierrelaye CDM · saison 2026-2027 · fiches préparées par Tom, d’après une vidéo tactique de FOOT.FR</footer>
+
+<script>
+(function(){
+"use strict";
+const US = {G:["KEVIN",6], LG:["AYRTON",13], DCG:["JOHNNY",3], DCD:["NICOLAS",4], LD:["SAMUEL",2],
+  "6":["JEHAN",9], "8G":["KEANU",8], "8D":["VINCENT",5], "10":["TOM",10], AG:["JOACHIM",14], AD:["THOMAS",11]};
+const $ = (q, r=document) => r.querySelector(q);
+const NS = "http://www.w3.org/2000/svg";
+function h(tag, attrs, parent, html){ const e=document.createElement(tag); if(attrs) for(const k in attrs) e.setAttribute(k, attrs[k]); if(html!=null) e.innerHTML=html; if(parent) parent.appendChild(e); return e; }
+function s(tag, attrs, parent){ const e=document.createElementNS(NS, tag); if(attrs) for(const k in attrs) if(attrs[k]!=null) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+const boards = [];
+let PHL = {set:"Mise en place", ex:"Exercice"};
+const GATES = [{x:15,y:5,c:"y"},{x:23,y:5,c:"y"},{x:77,y:5,c:"y"},{x:85,y:5,c:"y"}];
+function navWatch(ids){
+  const links = [...document.querySelectorAll("#nav a")];
+  const secs = ids.map(i=>document.getElementById(i));
+  function onScroll(){
+    let cur = null; const y = window.innerHeight*0.35;
+    secs.forEach(sc=>{ if(sc && sc.getBoundingClientRect().top < y) cur = sc.id; });
+    links.forEach(a=>a.classList.toggle("on", a.dataset.id===cur));
+  }
+  window.addEventListener("scroll", onScroll, {passive:true}); onScroll();
+  const hs = (location.hash||"").slice(1);
+  if(hs && document.getElementById(hs)) setTimeout(()=>document.getElementById(hs).scrollIntoView(), 60);
+}
+PHL = {set:"Placement", ex:"Action"};
+const ICON = {
+  play:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor"/></svg>',
+  prev:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5 4.5 8l6 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  next:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2.5 11.5 8l-6 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  again:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v3h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+/* ---------- Terrain ---------- */
+function drawPitch(svg, field){
+  const g = s("g", null, svg);
+  const stripes = s("g", null, g);
+  for(let i=0;i<10;i++) s("rect", {x:-30, y:-40+i*62, width:740, height:62, fill: i%2? "#2a7542" : "#2f7d47"}, stripes);
+  const L = {fill:"none", stroke:"rgba(255,255,255,.8)", "stroke-width":2.5};
+  if(field==="zone"){
+    s("rect", Object.assign({x:0,y:0,width:680,height:525,"stroke-dasharray":"10 8"}, L), g);
+    return;
+  }
+  const lines = s("g", field==="up" ? {transform:"translate(0,525) scale(1,-1)"} : null, g);
+  s("rect", Object.assign({x:0,y:0,width:680,height:525}, L), lines);
+  s("path", Object.assign({d:"M248.5,0 A91.5,91.5 0 0 0 431.5,0"}, L), lines);
+  s("circle", {cx:340, cy:0, r:4, fill:"rgba(255,255,255,.8)"}, lines);
+  s("rect", Object.assign({x:138.4, y:360, width:403.2, height:165}, L), lines);
+  s("rect", Object.assign({x:248.4, y:470, width:183.2, height:55}, L), lines);
+  s("circle", {cx:340, cy:415, r:3.5, fill:"rgba(255,255,255,.8)"}, lines);
+  s("path", Object.assign({d:"M266.9,360 A91.5,91.5 0 0 1 413.1,360"}, L), lines);
+  s("rect", {x:303.4, y:525, width:73.2, height:18, fill:"rgba(255,255,255,.18)", stroke:"rgba(255,255,255,.9)", "stroke-width":2.5}, lines);
+}
+const PX = p => [p[0]*6.8, p[1]*5.25];
+const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TWEEN = reduce ? 0 : 1100;
+
+function Board(root, ex){
+  this.ex = ex; this.root = root;
+  // États cumulés
+  const states = []; let st = {pos:{}, cones:[], ball:null};
+  ex.steps.forEach(sp=>{
+    const n = {pos:Object.assign({}, st.pos), cones:st.cones, ball:st.ball};
+    if(sp.cones) n.cones = sp.cones;
+    if(sp.add) Object.assign(n.pos, sp.add);
+    if(sp.mv) Object.assign(n.pos, sp.mv);
+    if(sp.rm) sp.rm.forEach(id=>delete n.pos[id]);
+    if("ball" in sp) n.ball = sp.ball;
+    states.push(n); st = n;
+  });
+  this.states = states;
+  this.restIndex = ex.steps.reduce((a,sp,i)=> sp.ph==="set" ? i : a, 0);
+  this.firstEx = ex.steps.findIndex(sp=>sp.ph==="ex");
+
+  const box = h("div", {class:"pitchbox"}, root);
+  const svg = s("svg", {viewBox:"-26 -34 732 600", role:"img", "aria-label":"Schéma animé : "+ex.title}, box);
+  const defs = s("defs", null, svg);
+  [["aw","#ffffff"],["ag","#ffd666"]].forEach(([id,c])=>{
+    const m = s("marker", {id:ex.id+"-"+id, viewBox:"0 0 10 10", refX:7, refY:5, markerWidth:4.2, markerHeight:4.2, orient:"auto-start-reverse"}, defs);
+    s("path", {d:"M0,0 L10,5 L0,10 z", fill:c}, m);
+  });
+  drawPitch(svg, ex.field);
+  this.gTri = s("g", null, svg);
+  this.gCones = s("g", null, svg);
+  this.gArrows = s("g", null, svg);
+  this.gEnts = s("g", null, svg);
+  this.gBall = s("g", null, svg);
+  this.gBadge = s("g", null, svg);
+  // Ballon
+  this.ball = s("g", {opacity:0}, this.gBall);
+  s("circle", {r:9.5, fill:"#ffffff", stroke:"#10241a", "stroke-width":2.2}, this.ball);
+  s("path", {d:"M-3.2,-2.4 L0,-4.6 L3.2,-2.4 L2,1.6 L-2,1.6 z", fill:"#10241a"}, this.ball);
+  // Joueurs
+  this.nodes = {};
+  const ids = new Set(); states.forEach(x=>Object.keys(x.pos).forEach(k=>ids.add(k)));
+  ids.forEach(id=>{ this.nodes[id] = this.makeEnt(id); });
+
+  this.stage = h("div", {class:"stage", "aria-live":"polite"}, root);
+  this.bar = h("div", {class:"bar"}, root);
+  this.segs = ex.steps.map((sp,i)=>{
+    const b = h("button", {class:sp.ph, "aria-label":"Étape "+(i+1)+" : "+sp.cap}, this.bar, "<i></i>");
+    b.addEventListener("click", ()=>{ this.goTo(i, true); if(this.playing) this.startTimer(); });
+    return b;
+  });
+  const c = h("div", {class:"ctrls"}, root);
+  this.bPlay = h("button", {class:"btn main", type:"button"}, c);
+  const grp = h("div", {class:"grp"}, c);
+  this.bPrev = h("button", {class:"btn icon", type:"button", "aria-label":"Étape précédente"}, grp, ICON.prev);
+  this.bNext = h("button", {class:"btn icon", type:"button", "aria-label":"Étape suivante"}, grp, ICON.next);
+  h("span", {class:"sp"}, c);
+  this.bSet = h("button", {class:"btn phase", type:"button"}, c, PHL.set);
+  this.bEx = h("button", {class:"btn phase", type:"button"}, c, PHL.ex);
+  const lg = h("div", {class:"legend"}, root);
+  lg.innerHTML = '<span><svg viewBox="0 0 22 12"><circle cx="6" cy="6" r="5" fill="#fff" stroke="#0d3d20" stroke-width="1.5"/></svg>Nous</span>'+
+    (Object.values(ex.ents||{}).some(e=>e.k==="adv") ? '<span><svg viewBox="0 0 22 12"><circle cx="6" cy="6" r="5" fill="#f08a4b" stroke="#fff" stroke-width="1.2"/></svg>Adversaire (chasuble)</span>' : '')+
+    '<span><svg viewBox="0 0 22 12"><line x1="1" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/></svg>Passe</span>'+
+    '<span><svg viewBox="0 0 22 12"><line x1="1" y1="6" x2="21" y2="6" stroke="#d9a520" stroke-width="2.4" stroke-dasharray="4 3"/></svg>Course</span>'+
+    '<span><svg viewBox="0 0 22 12"><path d="M6 1 11 11H1z" fill="#f28c28"/></svg>Plot</span>';
+
+  this.bPlay.addEventListener("click", ()=> this.playing ? this.pause() : this.play());
+  this.bPrev.addEventListener("click", ()=>{ if(this.cur>0){ this.goTo(this.cur-1, true); if(this.playing) this.startTimer(); } });
+  this.bNext.addEventListener("click", ()=>{ if(this.cur<this.states.length-1){ this.goTo(this.cur+1, true); if(this.playing) this.startTimer(); } });
+  this.bSet.addEventListener("click", ()=>{ this.goTo(0, true); if(this.playing) this.startTimer(); });
+  this.bEx.addEventListener("click", ()=>{ this.goTo(this.firstEx, true); if(this.playing) this.startTimer(); });
+
+  this.playing = false; this.cur = this.restIndex;
+  this.disp = this.snapshot(this.restIndex);
+  this.drawCones(this.disp.cones); this.render(this.disp); this.overlays(this.restIndex); this.info(this.restIndex); this.updBtns();
+}
+Board.prototype.makeEnt = function(id){
+  const g = s("g", {opacity:0}, this.gEnts);
+  const ring = s("circle", {r:24, class:"hl-ring", style:"display:none"}, g);
+  let body, lab;
+  if(US[id]){
+    body = s("circle", {r:17, fill:"#ffffff", stroke:"#0d3d20", "stroke-width":2.6}, g);
+    const t = s("text", {"text-anchor":"middle", y:7, "font-family":"Bebas Neue, Impact, sans-serif", "font-size":21, fill:"#0d3d20"}, g); t.textContent = US[id][1];
+    lab = s("text", {"text-anchor":"middle", y:39, "font-family":"Barlow Condensed, Arial Narrow, sans-serif", "font-weight":700, "font-size":19, "letter-spacing":.4, fill:"#ffffff", stroke:"rgba(6,28,15,.85)", "stroke-width":5, "paint-order":"stroke", "stroke-linejoin":"round"}, g);
+    lab.textContent = US[id][0];
+  } else {
+    const e = (this.ex.ents||{})[id] || {k:"adv"};
+    if(e.k==="adv"){
+      body = s("circle", {r:15, fill:"#f08a4b", stroke:"#ffffff", "stroke-width":2.4}, g);
+    } else if(e.k==="coach"){
+      body = s("rect", {x:-16, y:-16, width:32, height:32, rx:6, fill:"#e8b84b", stroke:"#0d3d20", "stroke-width":2.4}, g);
+      const t = s("text", {"text-anchor":"middle", y:7, "font-family":"Bebas Neue, Impact, sans-serif", "font-size":21, fill:"#0d3d20"}, g); t.textContent = e.t;
+      lab = s("text", {"text-anchor":"middle", y:39, "font-family":"Barlow Condensed, Arial Narrow, sans-serif", "font-weight":700, "font-size":18, fill:"#ffffff", stroke:"rgba(6,28,15,.85)", "stroke-width":5, "paint-order":"stroke"}, g);
+      lab.textContent = "LANCEUR";
+    } else {
+      body = s("circle", {r:22, fill:"#ffffff", stroke:"#0d3d20", "stroke-width":2.8}, g);
+      const t = s("text", {"text-anchor":"middle", y:9, "font-family":"Bebas Neue, Impact, sans-serif", "font-size":27, fill:"#0d3d20"}, g); t.textContent = e.t;
+    }
+  }
+  return {g, ring, body, us:!!US[id]};
+};
+Board.prototype.snapshot = function(k){
+  const st = this.states[k]; const pos = {};
+  for(const id in st.pos) pos[id] = PX(st.pos[id]);
+  return {pos, ball:this.ballXY(st, pos), cones:st.cones};
+};
+Board.prototype.ballXY = function(st, pos){
+  const b = st.ball; if(b==null) return null;
+  if(typeof b==="string"){ const p = pos[b]; return p ? [p[0]+15, p[1]+12] : null; }
+  return PX(b);
+};
+Board.prototype.render = function(d, op){
+  for(const id in this.nodes){
+    const n = this.nodes[id]; const p = d.pos[id];
+    if(p){ n.g.setAttribute("transform", "translate("+p[0].toFixed(1)+","+p[1].toFixed(1)+")"); n.g.setAttribute("opacity", (d.op && d.op[id]!=null) ? d.op[id] : 1); }
+    else n.g.setAttribute("opacity", 0);
+  }
+  if(d.ball){ this.ball.setAttribute("transform", "translate("+d.ball[0].toFixed(1)+","+d.ball[1].toFixed(1)+")"); this.ball.setAttribute("opacity", d.ballOp!=null ? d.ballOp : 1); }
+  else this.ball.setAttribute("opacity", 0);
+};
+Board.prototype.drawCones = function(cones, fadeKeys){
+  this.gCones.innerHTML = "";
+  cones.forEach(c=>{
+    const p = PX([c.x, c.y]);
+    const g = s("g", {transform:"translate("+p[0]+","+p[1]+")"}, this.gCones);
+    if(fadeKeys && !fadeKeys.has(c.x+","+c.y)) g.setAttribute("class", "fade");
+    if(c.c==="b"){ [[-8,0],[8,0],[0,-10]].forEach(o=> s("circle", {cx:o[0], cy:o[1], r:7, fill:"#fff", stroke:"#10241a", "stroke-width":1.6}, g)); }
+    else s("path", {d:"M0,-11 L10,8 L-10,8 Z", fill: c.c==="y" ? "#f4d03f" : "#f28c28", stroke:"rgba(0,0,0,.35)", "stroke-width":1.2}, g);
+  });
+};
+function shorten(a, b, s0, s1){
+  const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy)||1;
+  return [[a[0]+dx/L*s0, a[1]+dy/L*s0],[b[0]-dx/L*s1, b[1]-dy/L*s1], L];
+}
+Board.prototype.overlays = function(k){
+  const sp = this.ex.steps[k], st = this.states[k], prev = this.states[k-1];
+  const to = this.snapshot(k), from = prev ? this.snapshot(k-1) : null;
+  this.gArrows.innerHTML = ""; this.gTri.innerHTML = ""; this.gBadge.innerHTML = "";
+  const A = this.gArrows, id = this.ex.id;
+  const line = (a, b, kind, s0, s1, num)=>{
+    const r = shorten(a, b, s0, s1); if(r[2] < 30) return;
+    s("line", {x1:r[0][0], y1:r[0][1], x2:r[1][0], y2:r[1][1], class:"fade",
+      stroke: kind==="run" ? "#ffd666" : "#ffffff", "stroke-width": kind==="run" ? 3.6 : 3.4,
+      "stroke-dasharray": kind==="run" ? "11 8" : null, "stroke-linecap":"round",
+      "marker-end":"url(#"+id+(kind==="run"?"-ag":"-aw")+")"}, A);
+    if(num){ const m=[(r[0][0]+r[1][0])/2, (r[0][1]+r[1][1])/2];
+      const g = s("g", {transform:"translate("+m[0]+","+m[1]+")", class:"fade"}, A);
+      s("circle", {r:12, fill:"#e8b84b", stroke:"#0d3d20", "stroke-width":2}, g);
+      const t = s("text", {"text-anchor":"middle", y:6, "font-family":"Bebas Neue, Impact, sans-serif", "font-size":18, fill:"#0d3d20"}, g); t.textContent = num; }
+  };
+  if(sp.tri){
+    const pts = sp.tri.map(i=>to.pos[i]).filter(Boolean);
+    if(pts.length===3) s("polygon", {points:pts.map(p=>p.join(",")).join(" "), fill:"rgba(255,214,102,.2)", stroke:"rgba(255,214,102,.85)", "stroke-width":2.2, "stroke-dasharray":"6 6", class:"fade"}, this.gTri);
+  }
+  if(from && sp.runs) sp.runs.forEach(i=>{ if(from.pos[i] && to.pos[i]) line(from.pos[i], to.pos[i], "run", 20, 22); });
+  if(from && sp.pass!==false && "ball" in sp && from.ball && to.ball && JSON.stringify(prev.ball)!==JSON.stringify(st.ball)){
+    line(from.ball, to.ball, "pass", 6, typeof st.ball==="string" ? 12 : 8);
+  }
+  if(sp.circ) sp.circ.forEach((c,j)=>{
+    const a = typeof c[0]==="string" ? to.pos[c[0]] : PX(c[0]);
+    const b = typeof c[1]==="string" ? to.pos[c[1]] : PX(c[1]);
+    if(a && b) line(a, b, "pass", 22, typeof c[1]==="string" ? 24 : 6, j+1);
+  });
+  for(const i in this.nodes){
+    const n = this.nodes[i], on = sp.hl && sp.hl.indexOf(i) > -1;
+    n.ring.style.display = on ? "" : "none";
+    if(n.us) n.body.setAttribute("fill", on ? "#ffd666" : "#ffffff");
+  }
+  if(sp.badge){
+    const g = s("g", {transform:"translate(14,14)", class:"fade"}, this.gBadge);
+    const w = 22 + sp.badge.length*15;
+    s("rect", {x:0, y:0, width:w, height:44, rx:10, fill: (sp.badge==="STOP"||sp.bad) ? "#c2410c" : "#e8b84b"}, g);
+    const t = s("text", {x:w/2, y:33, "text-anchor":"middle", "font-family":"Bebas Neue, Impact, sans-serif", "font-size":32, "letter-spacing":1.5, fill: (sp.badge==="STOP"||sp.bad) ? "#ffffff" : "#0d3d20"}, g);
+    t.textContent = sp.badge;
+  }
+};
+Board.prototype.info = function(k){
+  const sp = this.ex.steps[k], steps = this.ex.steps;
+  const sameph = steps.filter(x=>x.ph===sp.ph), idx = sameph.indexOf(sp)+1;
+  this.stage.innerHTML = '<div class="ph"><span class="tag '+sp.ph+'">'+PHL[sp.ph]+'</span><span class="cnt">'+idx+" / "+sameph.length+'</span></div><h4>'+sp.cap+'</h4><p>'+sp.txt+'</p>';
+  this.segs.forEach((b,i)=>{ b.querySelector("i").style.setProperty("--p", i<k ? "100%" : (i===k ? (this.playing ? "0%" : "100%") : "0%")); b.setAttribute("aria-current", i===k ? "step" : "false"); });
+  this.bSet.classList.toggle("on", sp.ph==="set"); this.bEx.classList.toggle("on", sp.ph==="ex");
+};
+Board.prototype.updBtns = function(){
+  const end = this.cur >= this.states.length-1;
+  this.bPlay.innerHTML = this.playing ? ICON.pause+"Pause" : (this.started && end ? ICON.again+"Revoir" : ICON.play+(this.started ? "Reprendre" : "Lancer la vidéo"));
+  this.bPrev.disabled = this.cur===0; this.bNext.disabled = end;
+};
+Board.prototype.goTo = function(k, anim){
+  const from = this.disp, to = this.snapshot(k);
+  const fromCones = new Set((from.cones||[]).map(c=>c.x+","+c.y));
+  this.cur = k; this.drawCones(to.cones, fromCones); this.overlays(k); this.info(k); this.updBtns();
+  cancelAnimationFrame(this.tw);
+  if(!anim || !TWEEN){ this.disp = to; this.render(to); return; }
+  const t0 = performance.now();
+  const step = (now)=>{
+    const t = Math.min(1, (now-t0)/TWEEN), e = ease(t);
+    const d = {pos:{}, op:{}, ball:null, ballOp:1, cones:to.cones};
+    for(const id in this.nodes){
+      const a = from.pos[id], b = to.pos[id];
+      if(a && b){ d.pos[id] = [a[0]+(b[0]-a[0])*e, a[1]+(b[1]-a[1])*e]; d.op[id] = 1; }
+      else if(b){ d.pos[id] = b; d.op[id] = e; }
+      else if(a){ d.pos[id] = a; d.op[id] = 1-e; }
+    }
+    if(from.ball && to.ball){ d.ball = [from.ball[0]+(to.ball[0]-from.ball[0])*e, from.ball[1]+(to.ball[1]-from.ball[1])*e]; }
+    else if(to.ball){ d.ball = to.ball; d.ballOp = e; }
+    else if(from.ball){ d.ball = from.ball; d.ballOp = 1-e; }
+    this.render(d);
+    if(t < 1) this.tw = requestAnimationFrame(step); else { this.disp = to; this.render(to); }
+  };
+  this.tw = requestAnimationFrame(step);
+};
+Board.prototype.hold = function(k){
+  const sp = this.ex.steps[k];
+  return Math.min(7500, 2600 + 38*(sp.cap.length + sp.txt.length)/2);
+};
+Board.prototype.startTimer = function(){
+  this.t0 = performance.now(); this.dur = TWEEN + this.hold(this.cur);
+  cancelAnimationFrame(this.raf);
+  const tick = (now)=>{
+    if(!this.playing) return;
+    const p = Math.min(1, (now-this.t0)/this.dur);
+    const seg = this.segs[this.cur].querySelector("i"); seg.style.setProperty("--p", (p*100).toFixed(1)+"%");
+    if(p >= 1){
+      if(this.cur < this.states.length-1){ this.goTo(this.cur+1, true); this.startTimer(); }
+      else { this.playing = false; this.info(this.cur); this.updBtns(); }
+      return;
+    }
+    this.raf = requestAnimationFrame(tick);
+  };
+  this.raf = requestAnimationFrame(tick);
+};
+Board.prototype.play = function(){
+  boards.forEach(b=>{ if(b!==this && b.playing) b.pause(); });
+  const restart = !this.started || this.cur >= this.states.length-1;
+  this.started = true; this.playing = true;
+  if(restart){ this.disp = {pos:{}, cones:[], ball:null}; this.goTo(0, true); }
+  else { this.info(this.cur); this.updBtns(); }
+  this.startTimer();
+};
+Board.prototype.pause = function(){
+  this.playing = false; cancelAnimationFrame(this.raf); this.info(this.cur); this.updBtns();
+};
+
+const S2 = {G:[50,95], DCG:[24,85], DCD:[76,85], "6":[50,76], LG:[7,60], LD:[93,60], "8G":[28,46], "8D":[72,46]};
+const S3 = {G:[50,95], DCG:[26,84], DCD:[74,84], "6":[50,74], LG:[7,56], LD:[93,56], "8G":[34,64], "8D":[64,64], "10":[50,42], AG:[38,22], AD:[64,22]};
+const S4 = {G:[50,95], DCG:[24,86], DCD:[76,86], "6":[50,74], LG:[7,60], LD:[93,60], "8G":[32,58], "8D":[68,58], "10":[50,44], AG:[40,22], AD:[60,22]};
+const S5 = {"10":[50,56], "8G":[32,60], "8D":[68,60], AD:[68,26], d2:[70,18]};
+
+const EX = [
+{ id:"echauffement", short:"Triangle", title:"Le triangle", min:7, color:"#b98a1e",
+  obj:"Contrôle orienté et passe ferme, pour un ballon qui va vite sur l’herbe mouillée.",
+  meta:[["Joueurs","groupes de 3"],["Espace","triangle de 10 m"],["Matériel","3 plots et 1 ballon par groupe"]],
+  field:"zone", ents:{A:{k:"gen",t:"A"},B:{k:"gen",t:"B"},C:{k:"gen",t:"C"}},
+  steps:[
+   {ph:"set", cap:"Pose un triangle de plots, 10 m de côté.", txt:"Un triangle par groupe de 3. Avec 15 joueurs, ça fait 5 triangles.",
+    cones:[{x:50,y:18,c:"o"},{x:22,y:80,c:"o"},{x:78,y:80,c:"o"}]},
+   {ph:"set", cap:"Un joueur derrière chaque plot.", txt:"Corps ouvert, de trois-quarts : il voit d’où vient le ballon et où il va le jouer.",
+    add:{A:[50,9], B:[15,87], C:[85,87]}},
+   {ph:"set", cap:"Un ballon par groupe. Il part de A.", txt:"Premier sens de rotation : A → B → C → A.", ball:"A"},
+   {ph:"ex", cap:"A passe à B, au sol et ferme.", txt:"Avant que le ballon arrive, B a déjà jeté un œil vers C.", ball:"B", hl:["B"]},
+   {ph:"ex", cap:"B contrôle avec le pied le plus loin du ballon, vers C.", txt:"Le ballon ne s’arrête pas sous lui : il part déjà dans la bonne direction.",
+    mv:{B:[22,84]}, ball:[30,80], pass:false, hl:["B"]},
+   {ph:"ex", cap:"Deuxième touche : B passe à C.", txt:"Regarder, arrêter, orienter, passer. C prépare déjà son contrôle vers A.", mv:{B:[15,87]}, ball:"C", hl:["C"]},
+   {ph:"ex", cap:"C enchaîne vers A : le circuit tourne.", txt:"On ne s’arrête jamais. Celui qui n’a pas le ballon se prépare.", ball:"A", hl:["A"]},
+   {ph:"ex", cap:"Toutes les 2 minutes, on change de sens.", txt:"Après 4 minutes, passe en une touche si la qualité est là.",
+    circ:[["A","C"],["C","B"],["B","A"]]}
+  ],
+  say:"Avant de recevoir, je regarde où je vais jouer. Je contrôle avec le pied le plus loin, le ballon part déjà vers le suivant. Passe ferme, au sol, dans le pied.",
+  eval:["Il regarde le receveur suivant avant que le ballon arrive.","Il reçoit de trois-quarts, sur l’avant des pieds, pas planté.","Le contrôle part vers le partenaire suivant, avec le pied opposé.","Passe de l’intérieur du pied, cheville bloquée, ballon au sol."],
+  goals:["<em>8 passes sur 10</em> arrivent au sol, dans le bon pied.","Le ballon repart <em>à la 2e touche</em>, jamais à la 3e."],
+  fix:[["Il bloque le ballon sous la semelle, puis se retourne.","« Ouvre ton corps, laisse passer le ballon devant toi. »"],["Passes molles ou qui sautent.","« Cheville dure, regarde le ballon quand tu frappes. »"]],
+  easy:"2 touches libres, triangle de 12 m.", hard:"1 touche. Ou le receveur fait un pas de démarquage avant chaque passe."
+},
+{ id:"sortie", short:"Sortie à 3", title:"La sortie à 3", min:10, color:"#0d3d20",
+  obj:"Contre deux attaquants, on est quatre derrière avec Kevin. Il y a toujours un joueur libre : on le trouve.",
+  meta:[["Joueurs","Kevin, 2 centraux, Jehan, 2 latéraux, Keanu, Vincent + 2 à 3 adversaires"],["Espace","de notre but à 30 m"],["Matériel","5 plots jaunes, 3 chasubles, 10 ballons dans le but"]],
+  field:"down", ents:{a1:{k:"adv"},a2:{k:"adv"},a3:{k:"adv"}},
+  steps:[
+   {ph:"set", cap:"Pose une ligne de 5 plots à 30 m du but, d’une touche à l’autre.", txt:"C’est la ligne de sortie. Le ballon doit la passer au sol : dans les pieds d’un partenaire ou en conduite.",
+    cones:[{x:6,y:40,c:"y"},{x:28,y:40,c:"y"},{x:50,y:40,c:"y"},{x:72,y:40,c:"y"},{x:94,y:40,c:"y"}]},
+   {ph:"set", cap:"Kevin a le ballon. Chacun à sa place de ressortie.", txt:"Johnny et Nicolas écartés au bord de la surface, Jehan devant eux, Ayrton et Samuel hauts. Keanu et Vincent juste avant la ligne.",
+    add:S2, ball:"G"},
+   {ph:"set", cap:"2 attaquants adverses en chasuble.", txt:"Ils pressent à 50 % au début. On est 4 contre 2 derrière.", add:{a1:[40,66], a2:[60,66]}},
+   {ph:"ex", cap:"Les 2 attaquants sortent sur les centraux : Jehan est libre.", txt:"Kevin joue Jehan. Jehan a regardé avant de recevoir : il contrôle vers l’avant.",
+    mv:{a1:[31,79], a2:[69,79]}, ball:"6", hl:["6"]},
+   {ph:"ex", cap:"Jehan se retourne et joue Vincent : la ligne est passée.", txt:"Deux passes, au sol, vers l’avant.", ball:"8D", hl:["8D"]},
+   {ph:"ex", cap:"Deuxième cas : un attaquant reste collé à Jehan.", txt:"Alors Jehan n’est plus libre. Qui l’est ? Johnny.",
+    mv:Object.assign({}, S2, {a1:[50,68], a2:[68,79]}), ball:"G", pass:false, hl:["DCG"]},
+   {ph:"ex", cap:"Kevin joue Johnny.", txt:"Le ballon va toujours au joueur libre, même si c’est un défenseur.", ball:"DCG", hl:["DCG"]},
+   {ph:"ex", cap:"Johnny avance balle au pied.", txt:"Personne devant lui : il avance, tête levée, jusqu’à ce qu’un adversaire sorte sur lui.",
+    mv:{DCG:[30,62], a1:[38,58]}, runs:["DCG"], hl:["DCG"]},
+   {ph:"ex", cap:"L’adversaire sort : Johnny joue Keanu ou Ayrton.", txt:"Keanu se décale pour se montrer. Jehan redescend entre les centraux pour couvrir.",
+    mv:{"8G":[22,46], "6":[50,82]}, ball:"8G", runs:["8G","6"], hl:["8G"]},
+   {ph:"ex", cap:"Après 5 minutes : un 3e adversaire.", txt:"Il marque Jehan. La règle ne change pas : on compte, on trouve le joueur libre, au sol.",
+    mv:Object.assign({}, S2, {a1:[40,72], a2:[60,72]}), add:{a3:[52,64]}, ball:"G", pass:false}
+  ],
+  say:"Contre deux attaquants, on est quatre derrière avec Kevin. Il y a toujours un joueur libre : on le trouve en deux passes maximum. Le central libre avance balle au pied jusqu’à ce qu’un adversaire sorte sur lui.",
+  eval:["Les centraux s’écartent au bord de la surface dès que Kevin a le ballon.","Jehan se place là où il n’y a pas d’adversaire : devant ou entre les centraux.","Le porteur a regardé avant de recevoir : il sait où est le joueur libre.","Le central libre conduit vers l’avant, tête levée, et passe quand un adversaire sort.","Dans l’axe devant notre surface, seul Jehan reçoit sous pression."],
+  goals:["<em>4 sorties sur 5</em> passent la ligne au sol.","Le joueur libre est trouvé en <em>2 passes maximum</em>.","<em>0 ballon perdu</em> dans l’axe devant notre surface."],
+  fix:[["Les centraux restent collés l’un à l’autre.","« Écartez-vous, bord de la surface ! »"],["Tout le monde regarde le porteur, personne ne se montre.","« Où est le libre ? Montre-toi ! »"],["Le central libre donne tout de suite à côté.","« Personne devant toi ? Avance ! »"]],
+  easy:"Attaquants passifs, qui marchent.", hard:"3 adversaires actifs, 2 touches maximum."
+},
+{ id:"lance", short:"8 lancé", title:"Le 8 lancé dans le couloir", min:10, color:"#1a6b3a",
+  obj:"Le 8 reçoit en mouvement, jamais arrêté. Quand il part, l’attaquant redescend dans l’espace qu’il a laissé.",
+  meta:[["Joueurs","les 11 + 2 adversaires"],["Espace","demi-terrain, de notre but à la ligne médiane"],["Matériel","4 plots jaunes, 2 chasubles, 10 ballons"]],
+  field:"down", ents:{m1:{k:"adv"},d1:{k:"adv"}},
+  steps:[
+   {ph:"set", cap:"Pose 2 portes de 3 m près de la ligne médiane, une dans chaque couloir.", txt:"Comme hier : c’est la ligne d’arrivée.", cones:GATES},
+   {ph:"set", cap:"Côté droit : Nicolas a le ballon.", txt:"Samuel haut et large. Vincent part de plus bas, à l’intérieur. Tom entre les lignes, Thomas et Joachim hauts.",
+    add:S3, ball:"DCD"},
+   {ph:"set", cap:"Un milieu adverse sur Vincent, un défenseur sur Thomas.", txt:"Ils jouent à 50 % au début.", add:{m1:[68,57], d1:[68,15]}},
+   {ph:"ex", bad:true, badge:"À ÉVITER", cap:"À éviter : Vincent entre Nicolas et Samuel.", txt:"Il ramène son adversaire sur la ligne de passe et bouche le couloir de Samuel.",
+    mv:{"8D":[84,70], m1:[84,62]}, circ:[["DCD","LD"]], hl:["8D"]},
+   {ph:"ex", cap:"Vincent rentre dans l’axe, assez bas.", txt:"Son adversaire le suit. Le couloir s’ouvre.", mv:{"8D":[62,66], m1:[64,58]}, runs:["8D"], hl:["8D"]},
+   {ph:"ex", cap:"Vincent attaque le couloir en diagonale : Nicolas joue dans sa course.", txt:"Vincent part au moment où Nicolas lève la tête. Il reçoit lancé.",
+    mv:{"8D":[84,46], m1:[74,54]}, ball:"8D", runs:["8D"], hl:["8D","DCD"]},
+   {ph:"ex", cap:"Thomas redescend dans l’espace laissé par Vincent.", txt:"Vincent le trouve. Thomas peut se retourner ou remettre.",
+    mv:{AD:[76,32], d1:[74,24]}, ball:"AD", runs:["AD"], hl:["AD"]},
+   {ph:"ex", cap:"Thomas remet à Tom, qui arrive face au jeu.", txt:"Appui, remise : Tom reçoit avec tout le jeu devant lui.", mv:{"10":[58,40]}, ball:"10", runs:["10"], hl:["10"]},
+   {ph:"ex", cap:"Tom lance Samuel dans le couloir.", txt:"Samuel est monté pendant l’action, Joachim attaque l’axe. Le ballon a traversé les lignes d’un coup.",
+    mv:{LD:[83,9], AG:[46,11]}, ball:[81,6], runs:["LD","AG"], hl:["LD"]},
+   {ph:"ex", cap:"Même chose à gauche : Johnny, Keanu, Joachim, Tom, Ayrton.", txt:"On alterne droite et gauche à chaque passage.",
+    mv:Object.assign({}, S3, {m1:[68,57], d1:[68,15]}), ball:"DCG", pass:false, circ:[["DCG",[14,48]],[[14,48],[26,32]]]}
+  ],
+  say:"Le 8 ne reçoit jamais arrêté. Il part de plus bas, à l’intérieur, et attaque le couloir quand le central lève la tête. Quand le 8 part, l’attaquant redescend dans l’espace qu’il a laissé.",
+  eval:["Le 8 n’est jamais sur la ligne de passe entre le central et le latéral.","Le 8 démarre au moment où le central lève la tête, pas avant.","La passe arrive devant le 8, dans sa course.","L’attaquant redescend dans l’espace libre au moment où le 8 part.","Le latéral monte pendant l’action pour finir dans le couloir."],
+  goals:["Le 8 reçoit <em>en mouvement 4 fois sur 5</em>.","<em>4 circuits sur 5</em> arrivent dans la porte.","<em>2 touches maximum</em> par joueur."],
+  fix:[["Le 8 attend le ballon arrêté, près de la touche.","« Pars de plus bas, attaque l’espace ! »"],["Le 8 se colle entre le central et le latéral.","« Rentre dans l’axe, laisse le couloir ! »"],["L’attaquant reste collé à son défenseur.","« Redescends, prends la place de Vincent ! »"]],
+  easy:"Sans adversaires, en marchant, puis à vitesse de match.", hard:"Adversaires actifs. Nicolas choisit : 8 lancé ou Samuel, selon qui est libre."
+},
+{ id:"circuit10", short:"Circuit du 10", title:"Le circuit du 10", min:10, color:"#9a3412",
+  obj:"On vide l’axe pour Tom : Jehan descend, les 8 s’écartent, Tom arrive entre les lignes et se retourne.",
+  meta:[["Joueurs","les 11 + 5 adversaires"],["Espace","demi-terrain, de notre but à la ligne médiane"],["Matériel","4 plots jaunes, 5 chasubles, 10 ballons"]],
+  field:"down", ents:{a1:{k:"adv"},a2:{k:"adv"},m1:{k:"adv"},m2:{k:"adv"},m3:{k:"adv"}},
+  steps:[
+   {ph:"set", cap:"Les 2 portes près de la ligne médiane.", txt:"Mêmes portes que l’exercice précédent.", cones:GATES},
+   {ph:"set", cap:"Notre ressortie, Kevin a le ballon.", txt:"Centraux écartés, Jehan devant eux, Keanu et Vincent à mi-hauteur, Tom entre les lignes, les 9 hauts.", add:S4, ball:"G"},
+   {ph:"set", cap:"5 adversaires : 2 attaquants et 3 milieux.", txt:"Chacun suit un de nos joueurs. C’est justement ce qui va vider l’axe.",
+    add:{a1:[36,73], a2:[64,73], m1:[50,64], m2:[34,51], m3:[66,51]}},
+   {ph:"ex", cap:"Jehan décroche : son adversaire le suit.", txt:"Il descend franchement, presque entre les centraux.", mv:{"6":[50,83], m1:[50,73]}, runs:["6"], hl:["6"]},
+   {ph:"ex", cap:"Keanu et Vincent s’écartent au maximum.", txt:"Leurs adversaires les suivent. Regarde l’axe : il est vide.",
+    mv:{"8G":[19,47], "8D":[81,47], m2:[25,42], m3:[75,42]}, runs:["8G","8D"], hl:["8G","8D"]},
+   {ph:"ex", cap:"Kevin joue Nicolas.", txt:"Nicolas lève la tête : c’est le signal pour Tom.", ball:"DCD", hl:["DCD"]},
+   {ph:"ex", cap:"Tom vient dans l’interligne, Nicolas le trouve.", txt:"Tom arrive au moment de la passe, pas avant, sinon il est marqué. Passe au sol, appuyée.",
+    mv:{"10":[55,58]}, ball:"10", runs:["10"], hl:["10"]},
+   {ph:"ex", badge:"4 CONTRE 3", cap:"Tom se retourne : tout le monde remonte autour de lui.", txt:"Jehan remonte, Vincent revient vers l’axe, Samuel monte. 4 joueurs contre 3 adversaires.",
+    mv:{"6":[42,63], "8D":[65,40], LD:[91,40], "10":[56,54]}, runs:["6","8D","LD"], hl:["10","6","8D","LD"]},
+   {ph:"ex", cap:"Tom lance Thomas dans la porte.", txt:"Ou il joue Vincent, ou Samuel : celui qui est libre.", mv:{AD:[77,9], AG:[46,12]}, ball:[79,6], runs:["AD","AG"], hl:["AD"]},
+   {ph:"ex", cap:"Règle d’or : la zone de Tom n’est jamais vide.", txt:"Si Tom décroche ou part en profondeur, un attaquant prend sa place entre les lignes.",
+    mv:Object.assign({}, S4, {"10":[50,11], AG:[46,44], a1:[36,73], a2:[64,73], m1:[50,64], m2:[34,51], m3:[66,51]}), ball:"G", pass:false, runs:["10","AG"], hl:["AG"]}
+  ],
+  say:"Jehan descend et emmène son adversaire. Keanu et Vincent s’écartent et emmènent les leurs. L’axe est vide : Tom arrive au moment de la passe. Dès qu’il se retourne, tout le monde remonte autour de lui.",
+  eval:["Jehan décroche franchement et emmène son adversaire.","Keanu et Vincent s’écartent jusqu’aux couloirs, sans se mettre entre central et latéral.","Tom arrive dans l’interligne au moment où Nicolas lève la tête.","Passe verticale au sol, dans le pied de Tom le plus loin de l’adversaire.","Dès que Tom reçoit, 3 joueurs se rapprochent : Jehan, un 8 et le latéral."],
+  goals:["Tom reçoit <em>face au jeu 3 fois sur 5</em>.","Ballon dans une porte en <em>moins de 10 secondes</em> après la passe à Tom.","La zone de Tom n’est <em>jamais vide</em>."],
+  fix:[["Tom attend entre les lignes avant la passe et se fait marquer.","« Arrive au dernier moment ! »"],["Jehan ne descend pas assez : son adversaire reste dans l’axe.","« Descends franchement, emmène-le ! »"],["Après la passe à Tom, tout le monde regarde.","« Remontez autour de lui ! »"]],
+  easy:"Adversaires passifs, qui suivent leur joueur en marchant.", hard:"Adversaires libres. Si l’axe est fermé, on joue le 8 lancé (exercice 3)."
+},
+{ id:"long", short:"Relance longue", title:"La relance longue", min:5, color:"#55665b",
+  obj:"Une relance longue, c’est une passe pour Joachim. Keanu, Vincent et Tom montent autour de lui pour le deuxième ballon.",
+  meta:[["Joueurs","Kevin, Joachim, Tom, Keanu, Vincent, Thomas + 2 défenseurs"],["Espace","demi-terrain"],["Matériel","4 plots jaunes, 2 chasubles, 10 ballons"]],
+  field:"down", ents:{d1:{k:"adv"},d2:{k:"adv"}},
+  steps:[
+   {ph:"set", cap:"Les 2 portes, les ballons dans le but.", txt:"Kevin relance au pied ou à la main.", cones:GATES.concat([{x:62,y:97,c:"b"}])},
+   {ph:"set", cap:"Joachim à 35 m du but, un défenseur dans son dos.", txt:"Kevin a le ballon.", add:{G:[50,95], AG:[50,30], d1:[50,22]}, ball:"G"},
+   {ph:"set", cap:"Tom, Keanu et Vincent assez bas. Thomas sur le côté.", txt:"Un 2e défenseur surveille Thomas.", add:S5},
+   {ph:"ex", cap:"Kevin envoie long sur Joachim. Keanu, Vincent et Tom montent.", txt:"Ils viennent à 5-8 m de Joachim pour récupérer la remise.",
+    ball:"AG", mv:{"8G":[37,37], "8D":[63,37], "10":[50,45]}, runs:["8G","8D","10"], hl:["AG","8G","8D"]},
+   {ph:"ex", cap:"Joachim remet de la tête ou de la poitrine. Vincent récupère.", txt:"Joachim ne contrôle pas dos au but : il remet tout de suite.", ball:"8D", hl:["8D"]},
+   {ph:"ex", cap:"Vincent lance Thomas dans le dos.", txt:"Deux touches maximum : le deuxième ballon repart tout de suite vers l’avant.",
+    ball:[78,6], mv:{AD:[78,8]}, runs:["AD"], hl:["AD"]},
+   {ph:"ex", badge:"QUAND ?", cap:"Quand l’utiliser ?", txt:"Quand l’adversaire presse haut sur nos centraux, ou quand le terrain est lourd. Ce n’est pas bourrin si tout le monde monte."}
+  ],
+  say:"Quand Kevin joue long, ce n’est pas pour dégager : c’est une passe pour Joachim. Keanu, Vincent et Tom montent autour de lui pour récupérer la remise.",
+  eval:["Kevin vise Joachim, pas la touche ni le rond central.","Keanu, Vincent et Tom sont à 5-8 m de Joachim quand le ballon tombe.","Joachim remet tout de suite, sans contrôler dos au but.","Le deuxième ballon repart vers l’avant en 2 touches maximum."],
+  goals:["<em>3 deuxièmes ballons sur 5</em> récupérés.","<em>2 fois sur 5</em>, le ballon arrive dans une porte."],
+  fix:[["Les 8 restent bas et regardent le ballon partir.","« Montez ! Le deuxième ballon est pour nous. »"],["Joachim veut contrôler et se fait prendre.","« Remise directe, une touche ! »"]],
+  easy:"Défenseur passif sur Joachim.", hard:"Défenseur actif, et le 2e défenseur sur les deuxièmes ballons."
+}
+];
+function compact(id, cap, txt, dropProg){
+  const ex = EX.find(e=>e.id===id);
+  const m = {ph:"set", cap:cap, txt:txt, add:{}};
+  ex.steps.filter(x=>x.ph==="set").forEach(x=>{ if(x.cones) m.cones=x.cones; if(x.add) Object.assign(m.add, x.add); if("ball" in x) m.ball=x.ball; });
+  let st = ex.steps.filter(x=>x.ph==="ex");
+  if(dropProg) st = st.filter(x=>!/^Après|^Même/.test(x.cap));
+  return {field:ex.field, ents:ex.ents, title:ex.title, id:"f-"+id, steps:[m].concat(st)};
+}
+const F3B = {G:[50,95], DCG:[26,84], DCD:[74,84], "6":[50,74], LG:[8,60], LD:[92,58], "8G":[32,58], "8D":[68,58], "10":[50,42], AG:[40,22], AD:[60,22]};
+const F6B = {G:[50,95], DCG:[26,84], DCD:[74,84], "6":[50,72], LG:[8,60], LD:[93,58], "8G":[32,58], "8D":[64,64], "10":[50,42], AG:[40,22], AD:[62,22]};
+const F7B = {G:[50,95], DCG:[28,82], DCD:[72,82], "6":[50,66], LG:[8,44], "8G":[32,44], "8D":[68,44], LD:[92,44], "10":[50,28], AG:[38,14], AD:[62,14]};
+
+const FICHES = [
+{ id:"gardien", short:"Le gardien", title:"Le gardien, premier relanceur", time:"0:17 à 1:53", train:"Exercice 5 de la séance",
+  schema: compact("long", "Le placement pour la relance longue.", "Joachim à 35 m du but. Tom, Keanu et Vincent assez bas, Thomas sur le côté."),
+  video:"Le gardien a deux choix. Court : vers un latéral, un central ou le 6. Long : vers le 10 ou un attaquant qui sait garder le ballon. Le long n’est pas « bourrin » : à certains moments, il laisse au bloc le temps de remonter. Mais les deux relayeurs doivent alors jouer haut, tout près de celui qui reçoit, pour les deuxièmes ballons et les remises.",
+  nous:"Kevin a les deux choix. En long, on vise Joachim, qui garde le ballon et remet. Keanu, Vincent et Tom montent autour de lui. Ça sert quand le terrain est lourd ou quand l’adversaire presse haut.",
+  keep:"Une relance longue, c’est une passe, pas un dégagement."
+},
+{ id:"court", short:"Sortir court", title:"Sortir court : toujours un joueur libre", time:"1:53 à 4:08", train:"Exercice 2 de la séance",
+  schema: compact("sortie", "Le placement : Kevin a le ballon.", "Centraux écartés au bord de la surface, Jehan devant eux, latéraux hauts. 2 attaquants adverses.", true),
+  video:"Latéraux déjà hauts dans le couloir, centraux qui proposent. Les centraux peuvent s’écarter pour laisser le 6 décrocher : il reçoit face au jeu et déclenche l’action. Si le 6 est bloqué, il s’appuie sur un central, qui rejoue l’autre central écarté. L’attaquant adverse doit faire la navette, et un central se retrouve libre, avec de l’espace pour avancer.",
+  nous:"Johnny et Nicolas s’écartent, Jehan décroche. Contre 2 attaquants, on est 4 avec Kevin : on compte et on trouve le libre. Le central libre avance balle au pied jusqu’à ce qu’un adversaire sorte sur lui.",
+  keep:"Une relance n’est pas l’affaire d’une personne : quand le ballon bouge, tout le monde bouge."
+},
+{ id:"largeur", short:"La largeur", title:"Amener de la largeur", time:"4:08 à 8:06", train:"Exercices 3 et 4 de la séance",
+  schema:{ id:"f-largeur", title:"Amener de la largeur", field:"down", ents:{x1:{k:"adv"},x2:{k:"adv"}}, steps:[
+    {ph:"set", cap:"Le placement : ballon côté gauche, chez Johnny.", txt:"Ayrton dans son couloir, Keanu à l’intérieur, 2 adversaires de leur côté.",
+     add:Object.assign({}, F3B, {x1:[18,50], x2:[36,50]}), ball:"DCG"},
+    {ph:"ex", bad:true, badge:"À ÉVITER", cap:"Le piège : Ayrton collé à la ligne, Keanu qui vient à l’intérieur.", txt:"C’est lisible. Un adversaire presse Ayrton, l’autre ferme Keanu : le jeu ralentit.",
+     mv:{LG:[4,58], "8G":[28,64], x1:[8,52], x2:[30,58]}, ball:"LG", hl:["LG","8G"]},
+    {ph:"ex", cap:"Mieux : Ayrton reçoit un peu à l’intérieur.", txt:"Il ne se colle pas tout de suite à sa ligne.",
+     mv:{LG:[15,64], "8G":[32,58], x1:[20,54], x2:[36,50]}, ball:"LG", hl:["LG"]},
+    {ph:"ex", cap:"Keanu fait une grande course en diagonale vers le couloir.", txt:"Il amène la largeur et la vitesse. Il peut recevoir lancé.",
+     mv:{"8G":[6,40], x2:[16,44]}, runs:["8G"], hl:["8G"]},
+    {ph:"ex", cap:"Son adversaire le suit : le centre se libère. Tom vient réclamer.", txt:"Ayrton joue Tom, qui arrive dans la zone libre. Un attaquant peut aussi venir la prendre.",
+     mv:{"10":[36,47]}, ball:"10", runs:["10"], hl:["10"]},
+    {ph:"ex", cap:"Ensuite : Tom, Keanu, Joachim, et Jehan qui se projette.", txt:"Des combinaisons à trois ou quatre, tout près du ballon.",
+     mv:{"6":[50,60], AG:[28,30]}, runs:["6","AG"], hl:["6","AG","8G"]}
+  ]},
+  video:"Le losange est très serré au centre : il faut aller chercher la largeur. Le piège classique : le latéral collé à sa ligne et le relayeur qui vient à l’intérieur. C’est lisible, l’adversaire presse et le jeu ralentit. Mieux : le latéral reçoit un peu à l’intérieur et le relayeur fait une grande course en diagonale vers le couloir. Si son adversaire le suit, une zone se libère au centre : le 10 ou un attaquant vient la réclamer. Autre option : latéraux très hauts, relayeur dans l’axe, et le latéral cherche un attaquant qui décroche dans le couloir. Le ballon monte vite, mais les attaquants courent beaucoup et prennent des coups.",
+  nous:"À gauche, Ayrton reçoit et Keanu attaque le couloir. À droite, Samuel reçoit et Vincent attaque le couloir. Tom, Thomas et Joachim surveillent la zone qui se libère au centre.",
+  keep:"La largeur, on va la chercher en courant, au bon moment."
+},
+{ id:"lance", short:"Le 8 lancé", title:"Le relayeur lancé", time:"8:06 à 9:23", train:"Exercice 3 de la séance",
+  schema: compact("lance", "Le placement : Nicolas a le ballon.", "Samuel haut et large, Vincent plus bas à l’intérieur, Tom entre les lignes, Thomas et Joachim hauts."),
+  video:"On peut toucher directement le relayeur, depuis le gardien ou un central. Mais jamais à l’arrêt : il part plus bas et reçoit lancé, dans le couloir ouvert. Comme il reçoit loin du but, l’attaquant redescend d’un cran dans l’espace qu’il a laissé, pour combiner ou se retourner. Le latéral et le relayeur se projettent ensuite. L’idée : ne pas avancer ligne par ligne, mais traverser les lignes avec du jeu lancé, et mettre les attaquants en 1 contre 1.",
+  nous:"Nicolas joue Vincent lancé, Thomas redescend, Tom arrive face au jeu, Samuel finit dans le couloir. À gauche : Johnny, Keanu, Joachim, Tom, Ayrton.",
+  keep:"On reçoit lancé, jamais arrêté."
+},
+{ id:"dix", short:"Circuit du 10", title:"Le circuit du 10", time:"9:23 à 10:22", train:"Exercice 4 de la séance",
+  schema: compact("circuit10", "Le placement : Kevin a le ballon.", "Notre ressortie face à 2 attaquants et 3 milieux adverses."),
+  video:"Très efficace si le 10 est bon techniquement. Les centraux s’écartent, le 6 descend et attire son adversaire, les relayeurs s’écartent au maximum. L’axe est vide : le 10 vient dans l’interligne. Dès qu’il touche le ballon, le 6 remonte, les relayeurs coulissent, le latéral monte : 4 contre 3. Ça ne marche pas à chaque fois, mais plusieurs fois par match.",
+  nous:"C’est le circuit de Tom. Jehan descend, Keanu et Vincent s’écartent, Nicolas ou Johnny trouve Tom entre les lignes. Dès que Tom se retourne, Jehan, un 8 et le latéral remontent autour de lui.",
+  keep:"On vide l’axe pour que Tom le remplisse au bon moment."
+},
+{ id:"regles", short:"Règles d’or", title:"Les trois règles d’or", time:"11:32 à 15:31", train:"Exercices 3 et 4 de la séance",
+  schema:{ id:"f-regles", title:"Les trois règles d’or", field:"down", ents:{}, steps:[
+    {ph:"set", cap:"Le placement : Nicolas a le ballon.", txt:"On regarde le côté droit.", add:F6B, ball:"DCD"},
+    {ph:"ex", bad:true, badge:"À ÉVITER", cap:"Règle 1 : le 8 n’est jamais entre le central et le latéral.", txt:"Sinon il ramène son adversaire sur la ligne de passe et bouche le couloir.",
+     mv:{"8D":[84,72]}, circ:[["DCD","LD"]], hl:["8D"]},
+    {ph:"ex", cap:"Il rentre dans l’axe : Samuel reçoit avec de l’espace.", txt:"L’adversaire de Vincent le suit vers l’axe.",
+     mv:{"8D":[62,64], LD:[92,48]}, ball:"LD", runs:["8D","LD"], hl:["LD"]},
+    {ph:"ex", cap:"Règle 2 : la zone de Tom n’est jamais vide.", txt:"Tom part en profondeur ? Joachim redescend entre les lignes.",
+     mv:{"10":[52,13], AG:[48,42]}, runs:["10","AG"], hl:["AG"]},
+    {ph:"ex", badge:"CÔTÉ BALLON", cap:"Règle 3 : tout le monde se resserre côté ballon.", txt:"Jehan monte en arc de cercle devant Vincent, Keanu et Ayrton resserrent. Cinq solutions près du ballon, et on est déjà groupés si on le perd.",
+     mv:{"10":[60,38], AG:[42,24], "8D":[80,44], "6":[68,55], "8G":[50,56], LG:[24,64]}, ball:"8D", runs:["6","8G","LG"], hl:["6","8G","LG"]},
+    {ph:"ex", cap:"Et toujours : au sol, vers l’avant.", txt:"Pas de transversale. On avance vite, ballon au sol, en profitant des espaces entre les lignes."}
+  ]},
+  video:"Trois règles reviennent. Un : le relayeur ne se place jamais sur la ligne de passe entre le central et le latéral, sinon il y amène son adversaire. Deux : la zone du 10 est toujours occupée ; si le 10 décroche ou part en profondeur, un attaquant prend sa place. Trois : côté ballon, tout le monde se resserre. Le 6 vient en arc de cercle devant le relayeur, l’autre relayeur et le latéral opposé resserrent : cinq solutions près du ballon, et on est déjà groupés si on le perd. Pas de transversale : on avance au sol, vite, entre les lignes.",
+  nous:"Vincent et Keanu ne se mettent jamais entre le central et le latéral. Si Tom part, Thomas ou Joachim prend sa place. Ballon à droite : Jehan, Keanu et Ayrton se rapprochent.",
+  keep:"Au sol, vers l’avant, tous ensemble côté ballon."
+},
+{ id:"centraux", short:"Plus tard", title:"La relance par les centraux", tag:"Pour plus tard", time:"10:23 à 11:31, puis 12:44 à 13:44", train:"Pas encore à l’entraînement",
+  schema:{ id:"f-centraux", title:"La relance par les centraux", field:"down", ents:{}, steps:[
+    {ph:"set", cap:"Le placement : 2-1-4-3.", txt:"Deux centraux, Jehan, une ligne de 4 très haute, Tom et les deux attaquants.", add:F7B, ball:"DCD"},
+    {ph:"ex", cap:"Une ligne de 4 haute : Ayrton, Keanu, Vincent, Samuel.", txt:"Presque sur la ligne médiane. Avec Jehan et un attaquant qui redescend, on est en surnombre au milieu.", hl:["LG","8G","8D","LD"]},
+    {ph:"ex", cap:"Nicolas joue toujours vers l’avant.", txt:"Il voit tout le jeu, face à lui. Jamais de passe en retrait : une passe dans un espace, vers un joueur lancé.",
+     mv:{"8D":[72,38]}, ball:"8D", runs:["8D"], hl:["DCD","8D"]},
+    {ph:"ex", badge:"PLUS TARD", cap:"Très exigeant : on ne commence pas par ça.", txt:"Le coach de la vidéo le dit lui-même. Pour nous, ce sera quand les autres circuits seront automatiques."}
+  ]},
+  video:"La relance préférée du coach : la confier aux centraux. Ils sont toujours face au jeu, ils voient tout. Les latéraux montent très haut, les relayeurs aussi, presque sur la ligne médiane : on joue en 2-1-4-3, avec cinq joueurs au milieu et un surnombre. Les centraux jouent toujours vers l’avant, jamais en retrait, dans un espace, vers un joueur lancé. Mais c’est très exigeant, physiquement et tactiquement : il conseille de ne pas commencer par là.",
+  nous:"Pas pour vendredi. On y viendra quand les circuits des fiches 2 à 5 seront automatiques.",
+  keep:"Les centraux ne sont pas des bourrins : ce sont eux qui voient tout le jeu."
+},
+{ id:"systeme", short:"L’esprit", title:"Ce que le losange demande", time:"15:32 à 17:30", train:"Le bloc qui glisse",
+  schema:null,
+  video:"Le losange demande des joueurs qui fonctionnent les uns par rapport aux autres : si un joueur monte, un autre se replace. Sans ballon, on n’est presque jamais au duel : on cadre, le bloc coulisse et compense. C’est frustrant pour ceux qui aiment intervenir tout de suite, mais c’est la base. Avec le ballon, on exploite le trio appui, remise, profondeur. Pour le coach, c’est un des systèmes les plus difficiles à maîtriser, et un des plus beaux à voir.",
+  nous:"C’est notre bloc qui glisse : un seul sort, les autres couvrent. Avec le ballon, appui, remise, profondeur : Thomas remet, Tom se retourne, quelqu’un attaque l’espace.",
+  keep:"Si un joueur monte, un autre compense."
+}
+];
+(function(){
+  const nav = $("#nav"), idx = $("#index");
+  FICHES.forEach((f,i)=>{
+    h("a", {href:"#"+f.id, "data-id":f.id}, nav, "<b>"+(i+1)+"</b>"+f.short);
+    h("a", {href:"#"+f.id, class:"tl-row"}, idx, '<span class="m">'+(i+1)+'</span><span class="t">'+f.title+'<span class="d">'+f.keep+'</span></span>');
+  });
+  const host = $("#fiches");
+  FICHES.forEach((f,i)=>{
+    const sec = h("section", {class:"ex fiche", id:f.id, "aria-labelledby":f.id+"-t"}, host);
+    h("div", {class:"ex-head"}, sec, '<div class="ex-num">'+(i+1)+'</div><h2 id="'+f.id+'-t">'+f.title+'</h2><div class="dur">'+(f.tag ? '<b>'+f.tag.toUpperCase()+'</b>' : '')+'Dans la vidéo : '+f.time+'</div>');
+    h("div", {class:"card keep"}, sec, "<h3>À retenir</h3><p>"+f.keep+"</p>");
+    const grid = h("div", {class:"ex-grid"+(f.schema ? "" : " solo")}, sec);
+    let pl = null;
+    if(f.schema) pl = h("div", {class:"player"}, grid);
+    const sheet = h("div", {class:"sheet"}, grid);
+    h("div", {class:"card"}, sheet, "<h3>Ce que dit la vidéo</h3><p class=\"vid\">"+f.video+"</p>");
+    h("div", {class:"card say"}, sheet, "<h3>Chez nous</h3><p>"+f.nous+"</p>");
+    h("div", {class:"meta"}, sheet, "<span><b>À l’entraînement</b>"+f.train+"</span>");
+    if(f.schema) boards.push(new Board(pl, f.schema));
+  });
+  navWatch(FICHES.map(f=>f.id));
+})();
+
+})();
+</script>
+
+</body></html>
