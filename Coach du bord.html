@@ -1,0 +1,312 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Coach du bord</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* Layout : une colonne de bord de terrain — onglets collants en haut, cartes courtes, phrases à crier en gros. */
+:root{
+  --bg:#eef2ed; --surface:#ffffff; --ink:#10241a; --muted:#566a5d; --line:#d5dfd7; --chip:#e4ebe5;
+  --brand:#0d3d20; --brand-2:#1a6b3a; --on-brand:#ffffff; --gold:#e8b84b; --gold-soft:#fbf1d6; --gold-ink:#6b4e0c;
+  --good:#1f7a45; --good-soft:#e3f2e8; --bad:#b4371f; --bad-soft:#fbe6df;
+  --grass:#2e7d4a; --grass-2:#2a7344; --chalk:rgba(255,255,255,.75);
+  --f-display:"Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  --f-label:"Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body:"Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0a1510; --surface:#12221a; --ink:#e6eee8; --muted:#9bb0a2; --line:#24392c; --chip:#1b2e23;
+  --brand:#0d3d20; --brand-2:#4fb578; --gold-soft:#2a2410; --gold-ink:#f0d58e;
+  --good:#5cc489; --good-soft:#14301f; --bad:#f08a6d; --bad-soft:#38170f;
+  --grass:#1d5432; --grass-2:#1a4b2d; --chalk:rgba(255,255,255,.6); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0a1510; --surface:#12221a; --ink:#e6eee8; --muted:#9bb0a2; --line:#24392c; --chip:#1b2e23;
+  --brand:#0d3d20; --brand-2:#4fb578; --gold-soft:#2a2410; --gold-ink:#f0d58e;
+  --good:#5cc489; --good-soft:#14301f; --bad:#f08a6d; --bad-soft:#38170f;
+  --grass:#1d5432; --grass-2:#1a4b2d; --chalk:rgba(255,255,255,.6); color-scheme:dark }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:calc(64px + env(safe-area-inset-top,0px))}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:30; background:var(--brand)}
+:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+.wrap{max-width:640px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+h1,h2,h3,p{margin:0}
+h2,h3{text-wrap:balance}
+
+.hero{background:var(--brand); color:var(--on-brand)}
+.hero .wrap{padding-block:22px 20px; display:grid; gap:8px}
+.eyebrow{font-family:var(--f-label); font-weight:700; font-size:13px; letter-spacing:1.8px; text-transform:uppercase; color:var(--gold)}
+.hero h1{font-family:var(--f-display); font-weight:400; font-size:52px; line-height:.9; letter-spacing:.8px}
+.hero p{opacity:.92; max-width:52ch}
+
+nav.tabs{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--brand); border-top:1px solid rgba(255,255,255,.12)}
+nav.tabs .wrap{display:flex; gap:6px; overflow-x:auto; padding-block:8px; scrollbar-width:none}
+nav.tabs .wrap::-webkit-scrollbar{display:none}
+nav.tabs a{flex:0 0 auto; color:#fff; text-decoration:none; font-family:var(--f-label); font-weight:700; font-size:15px; letter-spacing:.3px; padding:7px 13px; border-radius:999px; background:rgba(255,255,255,.1)}
+nav.tabs a.on{background:var(--gold); color:#0d3d20}
+
+main{padding-block:20px 60px; display:grid; gap:34px}
+section{display:grid; gap:12px; min-width:0}
+.sh{display:flex; align-items:baseline; gap:10px}
+.sh .n{font-family:var(--f-display); font-size:30px; line-height:1; color:var(--brand-2)}
+.sh h2{font-family:var(--f-display); font-weight:400; font-size:32px; line-height:1; letter-spacing:.5px}
+.lead{color:var(--muted); max-width:60ch}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px; min-width:0}
+.lbl{font-family:var(--f-label); font-weight:700; font-size:12.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted)}
+
+.roles{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.roles .card b{display:block; font-family:var(--f-label); font-weight:700; font-size:19px; line-height:1.1; margin-bottom:4px}
+.roles .card p{font-size:14.5px; color:var(--muted)}
+@media (max-width:520px){ .roles{grid-template-columns:minmax(0,1fr)} }
+.dont{background:var(--gold-soft); border-color:transparent; color:var(--gold-ink)}
+.dont b{font-family:var(--f-label); font-weight:700; font-size:17px}
+.dont ul{margin:6px 0 0; padding-left:18px; display:grid; gap:4px}
+
+.pitchbox{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:10px; display:grid; gap:10px}
+.pitch{display:block; width:100%; max-width:440px; height:auto; margin:0 auto}
+.pitch .pl circle{stroke:#fff; stroke-width:2}
+.pitch text{font-family:var(--f-label); font-weight:700; text-anchor:middle}
+.bench{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center}
+.bench span{font-family:var(--f-label); font-weight:700; font-size:16px; background:var(--chip); border-radius:999px; padding:5px 12px}
+.chefs{display:grid; gap:6px; font-size:15px}
+.chefs div{display:flex; gap:8px; flex-wrap:wrap}
+.chefs b{font-family:var(--f-label); font-weight:700; min-width:92px}
+
+.calls{display:grid; gap:10px}
+.call{display:grid; grid-template-columns:minmax(0,1fr); gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px 16px}
+.call .see{font-size:15px; color:var(--muted)}
+.call .see::before{content:"Tu vois · "; font-family:var(--f-label); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:12.5px; color:var(--bad)}
+.call .say{font-family:var(--f-label); font-weight:700; font-size:24px; line-height:1.1; color:var(--brand-2)}
+.call .why{font-size:14px; color:var(--muted); border-top:1px dashed var(--line); padding-top:7px}
+.tag{display:inline-block; font-family:var(--f-label); font-weight:700; font-size:12px; letter-spacing:1.2px; text-transform:uppercase; padding:2px 8px; border-radius:6px; background:var(--chip); color:var(--muted); margin-right:6px; vertical-align:2px}
+
+.steps{list-style:none; margin:0; padding:0; display:grid; gap:8px; counter-reset:s}
+.steps li{display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:start; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px}
+.steps li::before{counter-increment:s; content:counter(s); display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--brand); color:#fff; font-family:var(--f-display); font-size:18px}
+.steps b{font-family:var(--f-label); font-weight:700; font-size:18px}
+.steps p{font-size:15px; color:var(--muted)}
+.pair{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; margin-top:6px}
+.pair div{border-radius:10px; padding:8px 10px; font-size:14.5px}
+.pair .no{background:var(--bad-soft); color:var(--bad)}
+.pair .yes{background:var(--good-soft); color:var(--good)}
+@media (max-width:420px){ .pair{grid-template-columns:minmax(0,1fr)} }
+
+.cheers{display:flex; flex-wrap:wrap; gap:8px}
+.cheers span{font-family:var(--f-label); font-weight:700; font-size:18px; background:var(--good-soft); color:var(--good); border-radius:12px; padding:8px 12px}
+.cheers.hard span{background:var(--gold-soft); color:var(--gold-ink)}
+
+.tablewrap{overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:16px}
+table{border-collapse:collapse; width:100%; min-width:420px; font-size:15px}
+th,td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--f-label); font-weight:700; font-size:12.5px; letter-spacing:1.3px; text-transform:uppercase; color:var(--muted)}
+td.min{font-family:var(--f-display); font-size:22px; line-height:1; color:var(--brand-2); font-variant-numeric:tabular-nums; white-space:nowrap}
+td .in{font-weight:700; color:var(--good)} td .out{color:var(--bad)}
+tr.ht td{background:var(--chip); font-family:var(--f-label); font-weight:700; letter-spacing:1px; text-transform:uppercase; font-size:13px; color:var(--muted)}
+tr:last-child td{border-bottom:0}
+
+.btns{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+.bt{border-radius:14px; padding:10px 12px; border:2px solid transparent}
+.bt b{display:block; font-family:var(--f-label); font-weight:700; font-size:17px; line-height:1.1}
+.bt span{font-size:14px}
+.bt.g{background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 30%, transparent)}
+.bt.r{background:var(--bad-soft); color:var(--bad); border-color:color-mix(in srgb, var(--bad) 30%, transparent)}
+.bt.o{background:var(--gold-soft); color:var(--gold-ink); border-color:color-mix(in srgb, var(--gold) 45%, transparent)}
+.bt.n{background:var(--chip); color:var(--ink)}
+.bt.key{outline:3px solid var(--gold); outline-offset:-1px}
+a.open{display:inline-block; text-decoration:none; background:var(--brand); color:#fff; font-family:var(--f-label); font-weight:700; font-size:18px; border-radius:14px; padding:12px 16px}
+
+.memo{background:var(--brand); color:#fff; border-radius:18px; padding:16px; display:grid; gap:8px}
+.memo .eyebrow{color:var(--gold)}
+.memo ol{margin:0; padding-left:22px; display:grid; gap:6px; font-family:var(--f-label); font-weight:700; font-size:21px; line-height:1.15}
+footer{color:var(--muted); font-size:13.5px; padding-block:0 30px}
+.call .see2{font-size:15px; line-height:1.5}
+.call .see2 b{font-weight:700}
+details.more{display:grid; gap:10px}
+details.more summary{cursor:pointer; font-family:var(--f-label); font-weight:700; font-size:18px; color:var(--brand-2); padding:10px 14px; background:var(--surface); border:1px solid var(--line); border-radius:14px}
+details.more[open] summary{margin-bottom:10px}
+</style>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">FC Pierrelaye CDM · Dimanche 1er novembre</div>
+  <h1>Coach du bord</h1>
+  <p>Jo, merci de laisser ta place et de prendre le banc. Tom joue : toi, tu vois tout le terrain depuis la touche. Ton job tient en trois mots : replacer, encourager, gérer les changements.</p>
+</div></header>
+
+<nav class="tabs" aria-label="Sections"><div class="wrap" id="tabs">
+  <a href="#role">Ton rôle</a><a href="#compo">Compo</a><a href="#crier">Quoi crier</a><a href="#replacer">Comment replacer</a><a href="#encourager">Encourager</a><a href="#changements">Changements</a>
+</div></nav>
+
+<main class="wrap">
+
+<div class="memo">
+  <div class="eyebrow">Si tu ne retiens que ça</div>
+  <ol>
+    <li>Un seul bloc : derrière le rond.</li>
+    <li>Le 8 sort, Jehan glisse, Tom reste sur leur 6.</li>
+    <li>Le latéral reste sur l’ailier.</li>
+    <li>Trois encouragements pour une correction.</li>
+  </ol>
+</div>
+
+<section id="role" aria-labelledby="role-t">
+  <div class="sh"><span class="n">1</span><h2 id="role-t">Ton rôle</h2></div>
+  <div class="roles">
+    <div class="card"><b>Replacer</b><p>Un joueur mal placé ? Tu l’appelles par son prénom et tu lui montres où aller.</p></div>
+    <div class="card"><b>Encourager</b><p>Tu félicites chaque bon placement, chaque effort de repli. Nos débutants en ont besoin.</p></div>
+    <div class="card"><b>Changer</b><p>Tu fais les changements du plan, au bon moment, et tu dis à chacun où il joue.</p></div>
+  </div>
+  <div class="card dont"><b>Ce que tu ne fais pas</b>
+    <ul>
+      <li>Pas de nouvelle consigne tactique : on répète les mêmes mots que Tom, Kevin, Nico, Jehan et Thomas sur le terrain.</li>
+      <li>Pas de reproche. On dit où aller, jamais ce qui est raté.</li>
+      <li>Pas de discours pendant le jeu : une phrase, un geste, c’est tout.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="compo" aria-labelledby="compo-t">
+  <div class="sh"><span class="n">2</span><h2 id="compo-t">La compo</h2></div>
+  <p class="lead">4-4-2 en losange. Notre but est en bas, on attaque vers le haut.</p>
+  <div class="pitchbox">
+    <svg class="pitch" viewBox="0 0 300 410" role="img" aria-label="Composition en 4-4-2 losange : gardien en bas, Samuel latéral droit, Nico et Kevin défenseurs centraux, Fredo latéral gauche, Jehan en 6, Keanu 8 droit, Vincent 8 gauche, Tom en 10, Thomas et Joachim en attaque.">
+      <rect x="0" y="0" width="300" height="410" rx="14" fill="var(--grass)"/>
+      <g fill="var(--grass-2)"><rect x="10" y="10" width="280" height="49"/><rect x="10" y="108" width="280" height="49"/><rect x="10" y="206" width="280" height="49"/><rect x="10" y="304" width="280" height="49"/></g>
+      <g fill="none" stroke="var(--chalk)" stroke-width="2">
+        <rect x="10" y="10" width="280" height="390"/>
+        <line x1="10" y1="205" x2="290" y2="205"/>
+        <circle cx="150" cy="205" r="34"/>
+        <rect x="80" y="10" width="140" height="48"/><rect x="80" y="352" width="140" height="48"/>
+        <rect x="118" y="10" width="64" height="18"/><rect x="118" y="382" width="64" height="18"/>
+      </g>
+      <g id="players"></g>
+    </svg>
+    <div class="bench" aria-label="Remplaçants"><span class="lbl">Banc</span><span>Tony</span><span>Ayrton</span><span>Johnny</span></div>
+  </div>
+  <div class="card chefs">
+    <div class="lbl">Chefs de ligne : ce sont eux que tu appuies</div>
+    <div><b>Défense</b><span>Kevin donne la voix pour faire monter ou reculer la ligne ; Nico replace ses voisins</span></div>
+    <div><b>Milieu</b><span>Tom</span></div>
+    <div><b>Attaque</b><span>Tom et Thomas</span></div>
+  </div>
+</section>
+
+<section id="crier" aria-labelledby="crier-t">
+  <div class="sh"><span class="n">3</span><h2 id="crier-t">Quoi crier</h2></div>
+  <p class="lead">Ce sont les mots qu’on a travaillés à l’entraînement : les gars les connaissent. Commence par les quatre essentielles, ce sont celles qui comptent le plus.</p>
+  <div class="lbl">Les 4 essentielles</div>
+  <div class="calls">
+    <div class="call"><span class="see">On défend, mais Joachim et Thomas restent devant. Un trou s’ouvre au milieu.</span><span class="say">« Joachim, Thomas : derrière le rond ! »</span><span class="why"><span class="tag">Un seul bloc</span>Entre l’attaquant et la défense, 30 mètres maximum.</span></div>
+    <div class="call"><span class="see">Leur latéral reçoit le ballon, seul sur le côté.</span><span class="say">« Keanu, sors ! » ou « Vincent, sors ! »</span><span class="why"><span class="tag">Le 8 sort</span>Keanu côté droit, Vincent côté gauche.</span></div>
+    <div class="call"><span class="see">Un 8 est sorti et personne ne se place derrière lui.</span><span class="say">« Jehan, glisse ! »</span><span class="why"><span class="tag">Le 6 glisse</span>C’est Jehan qui couvre derrière le 8, pas Tom.</span></div>
+    <div class="call"><span class="see">On a récupéré et relancé, mais la défense reste collée à notre surface.</span><span class="say">« Kevin, on monte ! »</span><span class="why"><span class="tag">Remonter</span>Kevin crie « On monte ! » et toute la ligne remonte ensemble jusqu’au milieu de terrain. Quand Kevin n’est pas dans l’axe, c’est toi qui cries « On monte ! » depuis la touche.</span></div>
+  </div>
+  <details class="more">
+    <summary>Cinq autres situations</summary>
+    <div class="calls">
+    <div class="call"><span class="see">Tom quitte leur 6 pour aller aider ailleurs.</span><span class="say">« Tom, sur leur 6 ! »</span><span class="why"><span class="tag">Le 10 reste</span>Tom ferme l’axe, il ne compense pas. Tu as le droit de le lui dire.</span></div>
+    <div class="call"><span class="see">Deux joueurs pressent le même adversaire, ou personne derrière celui qui presse.</span><span class="say">« Un sort, un couvre ! »</span><span class="why"><span class="tag">Couverture</span>Jamais deux sur le même, jamais personne derrière.</span></div>
+    <div class="call"><span class="see">Un latéral quitte leur ailier pour monter sur leur latéral.</span><span class="say">« Samuel, reste sur l’ailier ! »</span><span class="why"><span class="tag">Latéraux</span>Notre latéral ne lâche jamais leur ailier. Leur latéral, c’est le 8.</span></div>
+    <div class="call"><span class="see">On récupère le ballon.</span><span class="say">« Thomas, dans le dos ! »</span><span class="why"><span class="tag">Le contre</span>La plupart de nos buts viennent de là : passe vers l’avant tout de suite.</span></div>
+    <div class="call"><span class="see">Un défenseur garde le ballon dans l’axe alors qu’il est pressé.</span><span class="say">« Sur le côté ! »</span><span class="why"><span class="tag">Relance</span>Sous pression, on joue sur le côté. Dans l’axe, seuls Tom et Jehan reçoivent.</span></div>
+    </div>
+  </details>
+  <div class="card"><span class="lbl">S’ils jouent à deux devant</span><p style="margin-top:4px">Ce sera un 4-4-2. À la relance, c’est Jehan le joueur libre : <b>« Jehan, montre-toi ! »</b></p></div>
+</section>
+
+<section id="replacer" aria-labelledby="replacer-t">
+  <div class="sh"><span class="n">4</span><h2 id="replacer-t">Comment replacer</h2></div>
+  <ol class="steps">
+    <li><div><b>Un joueur à la fois, par son prénom</b><p>« Samuel ! » d’abord, pour qu’il tourne la tête. Puis la consigne.</p></div></li>
+    <li><div><b>Une phrase courte et un geste</b><p>Tu tends le bras vers l’endroit où il doit aller. Le geste porte plus loin que la voix.</p></div></li>
+    <li><div><b>Au bon moment</b><p>Pendant un arrêt de jeu (touche, sortie de but, faute) ou quand le ballon est loin de lui. Jamais quand il a le ballon dans les pieds.</p></div></li>
+    <li><div><b>Dire où aller, pas ce qui est raté</b>
+      <div class="pair"><div class="no">« T’es mal placé ! »</div><div class="yes">« Samuel, colle ton ailier ! »</div></div></div></li>
+    <li><div><b>Trois fois la même erreur ?</b><p>Tu arrêtes de crier : tu le dis à Tom au prochain arrêt de jeu, ou on en parle à la mi-temps.</p></div></li>
+  </ol>
+</section>
+
+<section id="encourager" aria-labelledby="encourager-t">
+  <div class="sh"><span class="n">5</span><h2 id="encourager-t">Encourager</h2></div>
+  <p class="lead">Règle simple : trois encouragements pour une correction. On félicite le placement et l’effort, pas seulement les buts.</p>
+  <div class="cheers"><span>« Bien couvert, Jehan ! »</span><span>« C’est ça, un seul bloc ! »</span><span>« Bien sorti, Keanu ! »</span><span>« Super repli, Thomas ! »</span><span>« Bien monté, la défense ! »</span><span>« Bonne passe, on continue ! »</span></div>
+  <div class="lbl" style="margin-top:6px">Quand on vient d’encaisser</div>
+  <div class="cheers hard"><span>« On relève la tête, on garde le bloc ! »</span><span>« Dix minutes compacts, et on les punit en contre ! »</span><span>« C’est rien, on reste ensemble ! »</span></div>
+  <div class="card" style="margin-top:4px"><p>Les débuts de match sont notre point faible : on se réveille souvent après avoir pris un but. Les dix premières minutes, parle beaucoup : <b>« Un seul bloc, on est concentrés ! »</b></p></div>
+</section>
+
+<section id="changements" aria-labelledby="changements-t">
+  <div class="sh"><span class="n">6</span><h2 id="changements-t">Les changements</h2></div>
+  <p class="lead">Le principe : tout le monde joue, et personne ne reste sur le banc tout le match. Ceux qui reviennent de blessure soufflent à des moments prévus. On change par vagues, vers la 25e minute de chaque mi-temps : tu attends l’arrêt de jeu le plus proche et tu fais les trois changements en même temps.</p>
+  <div class="lbl">Le plan normal · sans signe de Tom, c’est celui-là</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Vers</th><th>Entre</th><th>Sort</th><th>Poste</th></tr></thead>
+    <tbody>
+      <tr class="ht"><td colspan="4">1re vague · 1re mi-temps</td></tr>
+      <tr><td class="min">25′</td><td><span class="in">Ayrton</span></td><td><span class="out">Joachim</span></td><td>Attaquant. Ayrton reste jusqu’à la 70e</td></tr>
+      <tr><td class="min">25′</td><td><span class="in">Johnny</span></td><td><span class="out">Samuel</span></td><td>Latéral droit</td></tr>
+      <tr><td class="min">25′</td><td><span class="in">Tony</span></td><td><span class="out">Vincent</span></td><td>8 gauche</td></tr>
+      <tr class="ht"><td colspan="4">Reprise de la 2e mi-temps</td></tr>
+      <tr><td class="min">46′</td><td><span class="in">Joachim</span></td><td><span class="out">Thomas</span></td><td>Attaquant. Thomas souffle, Ayrton reste</td></tr>
+      <tr><td class="min">46′</td><td><span class="in">Vincent</span></td><td><span class="out">Tony</span></td><td>8 gauche</td></tr>
+      <tr><td class="min">46′</td><td><span class="in">Samuel</span></td><td><span class="out">Fredo</span></td><td>Samuel reprend à droite. Fredo souffle, Johnny reste et passe latéral gauche</td></tr>
+      <tr class="ht"><td colspan="4">2e vague · 2e mi-temps</td></tr>
+      <tr><td class="min">70′</td><td><span class="in">Thomas</span></td><td><span class="out">Ayrton</span></td><td>Attaquant</td></tr>
+      <tr><td class="min">70′</td><td><span class="in">Tony</span></td><td><span class="out">Keanu</span></td><td>8 droit</td></tr>
+      <tr><td class="min">70′</td><td><span class="in">Fredo</span></td><td><span class="out">Nico</span></td><td>Fredo revient à gauche, Johnny passe dans l’axe avec Kevin</td></tr>
+      <tr class="ht"><td colspan="4">Dernier quart d’heure : tu vois avec Tom à un arrêt de jeu</td></tr>
+    </tbody>
+  </table></div>
+  <div class="lbl">Les 3 moments où Tom peut changer le plan</div>
+  <div class="calls">
+    <div class="call"><span class="say">À la 25e · l’entrée de Tony</span><span class="see2">Sans signe, Tony remplace Vincent. Si Tom te montre <b>Keanu</b>, Tony remplace Keanu. Si Tom <b>se montre lui-même</b> (on est en difficulté), Tony le remplace en 10 : à la mi-temps, vous voyez ensemble qui reprend.</span></div>
+    <div class="call"><span class="say">À la mi-temps · Tom te dit A, B ou C</span><span class="see2"><b>A, plan normal</b> : le tableau ci-dessus.<br><b>B, ça pousse trop fort sur notre gauche</b> : Fredo sort quand même, mais Johnny joue dans l’axe avec Nico et Kevin passe latéral gauche. À la 70e, Fredo revient à gauche, Kevin repasse dans l’axe, et Nico ou Kevin sort.<br><b>C, on mène largement</b> : on fait aussi souffler Jehan. Jehan sort, Tom redescend en 6, Tony reste et joue en 10, Vincent revient en 8 gauche avec Keanu. La 2e vague, tu la vois avec Tom.</span></div>
+    <div class="call"><span class="say">À la 70e · qui souffle en défense</span><span class="see2">Sans signe, c’est Nico qui sort. Si Tom te montre <b>Kevin</b>, c’est Kevin, et Johnny joue dans l’axe avec Nico. Si Kevin n’est plus dans l’axe, c’est toi qui cries « On monte ! ».</span></div>
+  </div>
+  <ol class="steps">
+    <li><div><b>Tu préviens le remplaçant deux minutes avant</b><p>Il s’échauffe, et tu lui donnes son poste et une seule consigne (« Tu restes sur leur ailier »).</p></div></li>
+    <li><div><b>Arrêt de jeu, tu fais signe à l’arbitre</b><p>Le joueur qui sort quitte le terrain avant que l’autre n’entre.</p></div></li>
+    <li><div><b>Tu fais un signe à Tom</b><p>Pour qu’il sache qui est où.</p></div></li>
+  </ol>
+  <div class="card"><span class="lbl">Blessure ou gros coup de fatigue</span><p style="margin-top:4px">Même poste, même profil : <b>Johnny</b> pour un défenseur, <b>Tony</b> pour un milieu (il peut aussi jouer en 6), <b>Ayrton</b> pour un attaquant. Le plan reprend ensuite.</p></div>
+</section>
+
+</main>
+<footer class="wrap">FC Pierrelaye CDM · saison 2026-2027 · préparé par Tom pour Jo</footer>
+
+<script>
+(function(){
+  // Positions sur le terrain (notre but en bas) : x, y, nom, poste
+  var P = [
+    [150,368,"Gardien","G"],
+    [250,318,"Samuel","LD"],[188,334,"Nico","DC"],[112,334,"Kevin","DC"],[50,318,"Fredo","LG"],
+    [150,282,"Jehan","6"],[234,238,"Keanu","8"],[66,238,"Vincent","8"],
+    [150,186,"Tom","10"],[104,120,"Thomas","9"],[196,120,"Joachim","9"]
+  ];
+  var g = document.getElementById("players"), NS = "http://www.w3.org/2000/svg";
+  function el(n, a, t){ var e = document.createElementNS(NS, n); for(var k in a) e.setAttribute(k, a[k]); if(t) e.textContent = t; return e; }
+  P.forEach(function(p){
+    var grp = el("g", {"class":"pl"});
+    grp.appendChild(el("circle", {cx:p[0], cy:p[1], r:15, fill: p[3]==="G" ? "#e8b84b" : "#0d3d20"}));
+    grp.appendChild(el("text", {x:p[0], y:p[1]+5, "font-size":14, fill: p[3]==="G" ? "#0d3d20" : "#ffffff"}, p[3]));
+    var lab = el("text", {x:p[0], y:p[1]+31, "font-size":14, fill:"#ffffff"}, p[2]);
+    grp.appendChild(lab);
+    g.appendChild(grp);
+  });
+  // Onglet actif selon la section visible
+  var links = Array.prototype.slice.call(document.querySelectorAll("#tabs a"));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute("href")); });
+  function spy(){
+    var y = window.scrollY + 90, cur = 0;
+    secs.forEach(function(s, i){ if(s && s.offsetTop <= y) cur = i; });
+    links.forEach(function(a, i){ a.classList.toggle("on", i===cur); });
+    var on = links[cur]; if(on && on.scrollIntoView && on.parentNode.scrollWidth > on.parentNode.clientWidth){
+      var box = on.parentNode, l = on.offsetLeft - 16; if(l < box.scrollLeft || on.offsetLeft + on.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollLeft = l;
+    }
+  }
+  window.addEventListener("scroll", spy, {passive:true}); spy();
+})();
+</script>
+
+</body></html>
